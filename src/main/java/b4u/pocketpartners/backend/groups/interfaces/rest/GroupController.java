@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+@RestController
 @RequestMapping(value = "api/v1/groups", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Group", description = "Group Management Endpoints")
 public class GroupController {
