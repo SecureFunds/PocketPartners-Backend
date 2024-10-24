@@ -63,4 +63,12 @@ public class GroupMember {
      */
     protected GroupMember() {
     }
+
+    public Long getGroupId() {
+        return group.getId();
+    }
+
+    public Long getUserId() {
+        return userInformation.getId();
+    }
 }
