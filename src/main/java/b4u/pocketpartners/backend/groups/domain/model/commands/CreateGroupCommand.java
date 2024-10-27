@@ -17,5 +17,4 @@ public record CreateGroupCommand(String name, String groupPhoto, Set<Currencies>
     public Iterable<Currencies> getCurrency() {
         return currency;
     }
-
 }

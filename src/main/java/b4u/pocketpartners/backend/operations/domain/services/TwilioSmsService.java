@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 @EnableScheduling
 public class TwilioSmsService {
 
-    private final String ACCOUNT_SID = "------"; // Replace with your actual Twilio Account SID
-    private final String AUTH_TOKEN = "------";   // Replace with your actual Twilio Auth Token
-    private final String FROM_PHONE = "----"; // Your Twilio phone number
+    private final String ACCOUNT_SID = "AC7919f3fd9d979ab723d2ed5034d1dfae"; // Replace with your actual Twilio Account SID
+    private final String AUTH_TOKEN = "33eee23b1ba866f1562db6602a73331f";   // Replace with your actual Twilio Auth Token
+    private final String FROM_PHONE = "+18647774489"; // Your Twilio phone number
 
     public TwilioSmsService() {
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
