@@ -3,64 +3,123 @@ package b4u.pocketpartners.backend.unit.tests;
 import b4u.pocketpartners.backend.users.domain.model.aggregates.User;
 import b4u.pocketpartners.backend.users.domain.model.aggregates.UserInformation;
 import b4u.pocketpartners.backend.users.domain.model.commands.CreateUserInformationCommand;
+import b4u.pocketpartners.backend.users.domain.model.valueobjects.EmailAddress;
+import b4u.pocketpartners.backend.users.domain.model.valueobjects.PersonName;
+import b4u.pocketpartners.backend.users.domain.model.valueobjects.PhoneNumber;
+import b4u.pocketpartners.backend.users.domain.model.valueobjects.Photo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 
-public class UserInformationTests {
+class UserInformationTests {
 
-    private User user;
-    private UserInformation userInformation;
+    @Mock
+    private User mockUser;
+
+
+    private UserInformation userInfo;
 
     @BeforeEach
-    public void setUp() {
-        user = new User();
-        userInformation = new UserInformation("John", "Doe", "1234567890", "photoUrl", "john.doe@example.com", user);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        // Configuración del mock
+        when(mockUser.getUsername()).thenReturn("testUser");
+
+        // Crear una instancia de UserInformation usando el constructor con parámetros válidos
+        userInfo = new UserInformation("John", "Doe", "123456789", "photo.jpg", "john.doe@example.com", mockUser);
     }
 
     @Test
-    public void testConstructorAndGetters() {
-        assertEquals("John Doe", userInformation.getFullName());
-        assertEquals("1234567890", userInformation.getPhoneNumber());
-        assertEquals("photoUrl", userInformation.getPhoto());
-        assertEquals("john.doe@example.com", userInformation.getEmailAddress());
-        assertEquals(user, userInformation.getUser());
+    void userInformationInitializationWithAttributes() {
+        // Verifica que UserInformation se inicializa correctamente con atributos específicos
+        assertEquals("John Doe", userInfo.getFullName());
+        assertEquals("123456789", userInfo.getPhoneNumber());
+        assertEquals("photo.jpg", userInfo.getPhoto());
+        assertEquals("john.doe@example.com", userInfo.getEmailAddress());
+        assertEquals(mockUser, userInfo.getUser());
     }
 
     @Test
-    public void testUpdateName() {
-        userInformation.updateName("Jane", "Smith");
-        assertEquals("Jane Smith", userInformation.getFullName());
-    }
+    void userInformationInitializationWithCommand() {
+        // Arrange
+        Long userId = userInfo.getId(); // Se puede simular con el mock si es necesario
+        CreateUserInformationCommand command = new CreateUserInformationCommand("Jane", "Smith", "987654321", "profile.jpg", "jane.smith@example.com", userId);
 
-    @Test
-    public void testUpdatePhoneNumber() {
-        userInformation.updatePhoneNumber("0987654321");
-        assertEquals("0987654321", userInformation.getPhoneNumber());
-    }
-
-    @Test
-    public void testUpdatePhoto() {
-        userInformation.updatePhoto("newPhotoUrl");
-        assertEquals("newPhotoUrl", userInformation.getPhoto());
-    }
-
-    @Test
-    public void testUpdateEmail() {
-        userInformation.updateEmail("jane.smith@example.com");
-        assertEquals("jane.smith@example.com", userInformation.getEmailAddress());
-    }
-
-    @Test
-    public void testConstructorWithCommand() {
-        CreateUserInformationCommand command = new CreateUserInformationCommand("Alice", "Johnson", "123456789", "photoLink", "alice.johnson@example.com", 1L);
+        // Act
         UserInformation userInfoFromCommand = new UserInformation(command);
 
-        assertEquals("Alice Johnson", userInfoFromCommand.getFullName());
-        assertEquals("123456789", userInfoFromCommand.getPhoneNumber());
-        assertEquals("photoLink", userInfoFromCommand.getPhoto());
-        assertEquals("alice.johnson@example.com", userInfoFromCommand.getEmailAddress());
-        assertNotNull(userInfoFromCommand.getUser()); // Assuming a new User is created in the constructor
+        // Assert
+        assertEquals("Jane Smith", userInfoFromCommand.getFullName());
+        assertEquals("987654321", userInfoFromCommand.getPhoneNumber());
+        assertEquals("profile.jpg", userInfoFromCommand.getPhoto());
+        assertEquals("jane.smith@example.com", userInfoFromCommand.getEmailAddress());
+    }
+
+    @Test
+    void updateName() {
+        // Act
+        userInfo.updateName("Mike", "Johnson");
+
+        // Assert
+        assertEquals("Mike Johnson", userInfo.getFullName());
+    }
+
+    @Test
+    void updatePhoneNumber() {
+        // Act
+        userInfo.updatePhoneNumber("555123456");
+
+        // Assert
+        assertEquals("555123456", userInfo.getPhoneNumber());
+    }
+
+    @Test
+    void updatePhoto() {
+        // Act
+        userInfo.updatePhoto("newphoto.jpg");
+
+        // Assert
+        assertEquals("newphoto.jpg", userInfo.getPhoto());
+    }
+
+    @Test
+    void updateEmail() {
+        // Act
+        userInfo.updateEmail("new.email@example.com");
+
+        // Assert
+        assertEquals("new.email@example.com", userInfo.getEmailAddress());
+    }
+
+
+    @Test
+    void setNameDirectly() {
+        // Arrange
+        PersonName newName = new PersonName("Alice", "Wonderland");
+
+        // Act
+        userInfo.setName(newName);
+
+        // Assert
+        assertEquals("Alice Wonderland", userInfo.getFullName());
+    }
+
+    @Test
+    void setEmailDirectly() {
+        // Arrange
+        EmailAddress newEmail = new EmailAddress("alice@example.com");
+
+        // Act
+        userInfo.setEmail(newEmail);
+
+        // Assert
+        assertEquals("alice@example.com", userInfo.getEmailAddress());
     }
 }
