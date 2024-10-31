@@ -10,6 +10,8 @@ public record CreatePaymentResource(@NotNull
                                     @NotNull
                                     BigDecimal amount,
                                     @NotNull
+                                    String receipt,
+                                    @NotNull
                                     Long userId,
                                     @NotNull
                                     Long expenseId
