@@ -1,9 +1,6 @@
 package b4u.pocketpartners.backend.operations.domain.model.aggregates;
 
-import b4u.pocketpartners.backend.operations.domain.model.valueobjects.Amount;
-import b4u.pocketpartners.backend.operations.domain.model.valueobjects.Description;
-import b4u.pocketpartners.backend.operations.domain.model.valueobjects.DueDate;
-import b4u.pocketpartners.backend.operations.domain.model.valueobjects.PaymentStatus;
+import b4u.pocketpartners.backend.operations.domain.model.valueobjects.*;
 import b4u.pocketpartners.backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import b4u.pocketpartners.backend.users.domain.model.aggregates.UserInformation;
 import jakarta.persistence.*;
@@ -23,6 +20,10 @@ public class Payment extends AuditableAbstractAggregateRoot<Payment> {
     private Amount amount;
 
     private PaymentStatus status;
+
+    @Getter
+    @Embedded
+    private Receipt receipt;
 
     @Getter
     @ManyToOne
@@ -60,6 +61,7 @@ public class Payment extends AuditableAbstractAggregateRoot<Payment> {
 
     public String getStatus(){return this.status.name().toLowerCase();}
 
+    public String getReceipt(){return receipt.getReceipt();}
 
 }
 

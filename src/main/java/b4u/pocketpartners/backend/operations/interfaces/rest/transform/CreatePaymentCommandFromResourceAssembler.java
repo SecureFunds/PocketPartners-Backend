@@ -5,6 +5,6 @@ import b4u.pocketpartners.backend.operations.interfaces.rest.resources.CreatePay
 
 public class CreatePaymentCommandFromResourceAssembler {
     public static CreatePaymentCommand toCommandFromResource(CreatePaymentResource resource) {
-        return new CreatePaymentCommand(resource.description(), resource.amount(), resource.userId(), resource.expenseId());
+        return new CreatePaymentCommand(resource.description(), resource.amount(), resource.receipt(), resource.userId(), resource.expenseId());
     }
 }
