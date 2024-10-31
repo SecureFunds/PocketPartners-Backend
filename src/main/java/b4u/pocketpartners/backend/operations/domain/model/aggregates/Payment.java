@@ -1,6 +1,7 @@
 package b4u.pocketpartners.backend.operations.domain.model.aggregates;
 
 import b4u.pocketpartners.backend.operations.domain.model.valueobjects.*;
+import b4u.pocketpartners.backend.operations.domain.model.valueobjects.Receipt;
 import b4u.pocketpartners.backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import b4u.pocketpartners.backend.users.domain.model.aggregates.UserInformation;
 import jakarta.persistence.*;
@@ -37,12 +38,13 @@ public class Payment extends AuditableAbstractAggregateRoot<Payment> {
 
     public Payment() {}
 
-    public Payment(String description, BigDecimal amount, UserInformation userInformation, Expense expense) {
+    public Payment(String description, BigDecimal amount, UserInformation userInformation, Expense expense, Receipt receipt) {
         this.description = new Description(description);
         this.amount = new Amount(amount);
         this.status = PaymentStatus.PENDING;
         this.userInformation = userInformation;
         this.expense = expense;
+        this.receipt = receipt;
     }
 
     public Payment UpdateInformation(String newDescription, BigDecimal newAmount){

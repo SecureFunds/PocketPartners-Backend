@@ -4,6 +4,7 @@ import b4u.pocketpartners.backend.operations.domain.exceptions.UserNotFoundExcep
 import b4u.pocketpartners.backend.operations.domain.model.aggregates.Payment;
 import b4u.pocketpartners.backend.operations.domain.model.commands.CompletePaymentCommand;
 import b4u.pocketpartners.backend.operations.domain.model.commands.CreatePaymentCommand;
+import b4u.pocketpartners.backend.operations.domain.model.valueobjects.Receipt;
 import b4u.pocketpartners.backend.operations.domain.services.PaymentCommandService;
 import b4u.pocketpartners.backend.operations.infrastructure.persistence.jpa.repositories.ExpenseRepository;
 import b4u.pocketpartners.backend.operations.infrastructure.persistence.jpa.repositories.PaymentRepository;
@@ -29,7 +30,8 @@ public class PaymentCommandServiceImpl implements PaymentCommandService {
     public Long handle(CreatePaymentCommand command) {
         expenseRepository.findById(command.expenseId()).map(expense -> {
             UserInformation userInformation = userInformationRepository.findById(command.userId()).orElseThrow(() -> new UserNotFoundException(command.userId()));
-            Payment payment = new Payment(command.description(), command.amount(), userInformation, expense);
+            Receipt receipt = new Receipt(command.receipt());
+            Payment payment = new Payment(command.description(), command.amount(), userInformation, expense, receipt);
             payment = paymentRepository.save(payment);
             return payment.getId();
         }).orElseThrow(() -> new RuntimeException("User not found"));
