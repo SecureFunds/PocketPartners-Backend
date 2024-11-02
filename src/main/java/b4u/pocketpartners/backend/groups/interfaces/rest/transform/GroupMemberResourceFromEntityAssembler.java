@@ -5,6 +5,6 @@ import b4u.pocketpartners.backend.groups.interfaces.rest.resources.GroupMemberRe
 
 public class GroupMemberResourceFromEntityAssembler {
     public static GroupMemberResource fromEntityToResource(GroupMember resource) {
-        return new GroupMemberResource(resource.getGroup().getId(), resource.getUserInformation().getId(), resource.getJoinedAt());
+        return new GroupMemberResource(resource.getGroup().getId(), resource.getUserInformation().getId(), resource.getUserInformation().getFullName(), resource.getRole(), resource.getJoinedAt());
     }
 }

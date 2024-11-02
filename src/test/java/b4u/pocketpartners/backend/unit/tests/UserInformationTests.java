@@ -61,6 +61,6 @@ public class UserInformationTests {
         assertEquals("123456789", userInfoFromCommand.getPhoneNumber());
         assertEquals("photoLink", userInfoFromCommand.getPhoto());
         assertEquals("alice.johnson@example.com", userInfoFromCommand.getEmailAddress());
-        assertNotNull(userInfoFromCommand.getUser()); // Assuming a new User is created in the constructor
+        assertNotNull(userInfoFromCommand.getUser());
     }
 }

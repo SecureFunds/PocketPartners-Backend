@@ -27,17 +27,17 @@ public class ExpensesNotificationService {
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
 
-        // Obtener pagos que vencen mañana
+
         List<Expense> upcomingPayments = expenseQueryService.handle(new GetAllExpensesByDueDate(tomorrow));
-        // Obtener pagos que están atrasados (vencen hoy)
+
         List<Expense> overduePayments = expenseQueryService.handle(new GetAllExpensesByDueDate(today));
 
-        // Enviar recordatorios para pagos próximos
+
         for (Expense expense : upcomingPayments) {
             sendReminder(expense, "Tu pago vence mañana: " + expense.getName() + " por " + expense.getAmount());
         }
 
-        // Enviar recordatorios para pagos atrasados
+
         for (Expense expense : overduePayments) {
             sendReminder(expense, "Tu pago está atrasado: " + expense.getName() + " por " + expense.getAmount());
         }
@@ -45,7 +45,7 @@ public class ExpensesNotificationService {
 
     private void sendReminder(Expense expense, String message) {
         UserInformation userInformation = expense.getUserInformation();
-        String phoneNumber = userInformation.getPhoneNumber(); // Asegúrate de que el número de teléfono esté disponible
+        String phoneNumber = userInformation.getPhoneNumber();
 
         twilioSmsService.sendReminder(phoneNumber, message);
     }

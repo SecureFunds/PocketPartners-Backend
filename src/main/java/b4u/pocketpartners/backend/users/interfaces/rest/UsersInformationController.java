@@ -42,7 +42,7 @@ public class UsersInformationController {
         this.userInformationCommandService = userInformationCommandService;
     }
 
-    //CREATE
+
     @Operation(summary = "Create a new user information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User information created successfully"),
@@ -54,15 +54,14 @@ public class UsersInformationController {
         var user = userInformationCommandService.handle(createUserCommand);
         if (user.isEmpty()) return ResponseEntity.badRequest().build();
         var userResource = UserInformationResourceFromEntityAssembler.toResourceFromEntity(user.get());
-        try {
-            emailService.sendWelcomeEmail(userResource.email(), userResource.fullName());
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            emailService.sendWelcomeEmail(userResource.email(), userResource.fullName());
+//        } catch (MessagingException e) {
+//            throw new RuntimeException(e);
+//        }
         return new ResponseEntity<>(userResource, HttpStatus.CREATED);
     }
 
-    //GET BY ID
     @Operation(summary = "Get user information by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User information found"),
@@ -93,7 +92,6 @@ public class UsersInformationController {
         return ResponseEntity.ok(profileResource);
     }
 
-    //GET ALL
     @Operation(summary = "Get all users information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of users information")
@@ -106,8 +104,6 @@ public class UsersInformationController {
         return ResponseEntity.ok(userResources);
     }
 
-
-    //UPDATE
     @Operation(summary = "Update user information by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User information updated successfully"),
@@ -124,7 +120,7 @@ public class UsersInformationController {
     }
 
 
-    //DELETE
+
     @Operation(summary = "Delete user information by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "User information deleted successfully"),

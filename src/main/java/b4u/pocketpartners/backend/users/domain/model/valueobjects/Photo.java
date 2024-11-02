@@ -19,7 +19,7 @@ public record Photo(
      * @return a Photo instance with a default value.
      */
     public static Photo defaultPhoto() {
-        return new Photo("default_photo_string"); // Replace with an actual default photo string
+        return new Photo("default_photo_string");
     }
 
     /**

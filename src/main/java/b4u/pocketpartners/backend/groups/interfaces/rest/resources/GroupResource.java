@@ -8,10 +8,9 @@ import java.util.Set;
 public record GroupResource(
         Long id,
         String name,
-        Set<Currency> currency,
+       String description,
         String groupPhoto,
         Date createdAt,
-        Date updatedAt,
-        String invitationToken
+        Date updatedAt
 ) {
 }

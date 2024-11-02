@@ -17,19 +17,18 @@ import java.util.UUID;
 @Embeddable
 public record InvitationToken(String token) {
 
-    // Constructor principal con validación
+
     public InvitationToken {
         if (token == null || token.isBlank()) {
             throw new IllegalArgumentException("El token de invitación no puede ser nulo ni vacío");
         }
     }
 
-    // Constructor sin argumentos que genera un token único automáticamente
-    public InvitationToken() {
+      public InvitationToken() {
         this(UUID.randomUUID().toString());
     }
 
-    // Método accesor para obtener el valor del token
+
     public String getToken() {
         return token;
     }

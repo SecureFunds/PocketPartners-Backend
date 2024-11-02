@@ -5,6 +5,6 @@ import b4u.pocketpartners.backend.groups.interfaces.rest.resources.CreateGroupRe
 
 public class CreateGroupCommandFromResourceAssembler {
     public static CreateGroupCommand toCommandFromResource(CreateGroupResource createGroupResource) {
-        return new CreateGroupCommand(createGroupResource.name(), createGroupResource.groupPhoto(), createGroupResource.currency());
+        return new CreateGroupCommand(createGroupResource.name(), createGroupResource.groupPhoto(), createGroupResource.description(), createGroupResource.adminId());
     }
 }

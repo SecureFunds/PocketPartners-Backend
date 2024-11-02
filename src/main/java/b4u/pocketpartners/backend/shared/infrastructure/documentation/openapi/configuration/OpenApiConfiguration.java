@@ -27,7 +27,7 @@ public class OpenApiConfiguration implements WebMvcConfigurer {
 
     @Bean
     public OpenAPI pocketPartnersOpenApi() {
-        // General configuration
+
         var openApi = new OpenAPI();
         openApi
                 .info(new Info()

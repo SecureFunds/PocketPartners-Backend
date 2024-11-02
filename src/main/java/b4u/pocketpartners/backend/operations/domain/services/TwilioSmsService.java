@@ -10,34 +10,34 @@ import org.springframework.stereotype.Service;
 @EnableScheduling
 public class TwilioSmsService {
 
-    private final String ACCOUNT_SID = "--------------------"; // Replace with your actual Twilio Account SID
-    private final String AUTH_TOKEN = "-----------------------";   // Replace with your actual Twilio Auth Token
-    private final String FROM_PHONE = "-----------------------"; // Your Twilio phone number
+    private final String ACCOUNT_SID = "--------------------";
+    private final String AUTH_TOKEN = "-----------------------";
+    private final String FROM_PHONE = "-----------------------";
 
     public TwilioSmsService() {
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
     }
 
-    // Método para formatear el número de teléfono
+
     private String formatPhoneNumber(String phoneNumber) {
-        // Asegúrate de que el número tenga el prefijo "+"
+
         if (!phoneNumber.startsWith("+")) {
-            // Prepend el código de país (Perú, +51 en este caso)
+
             phoneNumber = "+51" + phoneNumber;
         }
         return phoneNumber;
     }
 
-    // Método para enviar recordatorios
+
     public void sendReminder(String toPhoneNumber, String dueDate) {
-        // Formatear el número de teléfono antes de enviarlo
+
         String formattedPhoneNumber = formatPhoneNumber(toPhoneNumber);
         String messageBody = String.format("Recordatorio:");
 
         Message.creator(
-                new PhoneNumber(formattedPhoneNumber), // Número de destino (formateado)
-                new PhoneNumber(FROM_PHONE),          // Número de origen (Twilio)
-                messageBody                           // Cuerpo del mensaje
+                new PhoneNumber(formattedPhoneNumber),
+                new PhoneNumber(FROM_PHONE),
+                messageBody
         ).create();
     }
 }

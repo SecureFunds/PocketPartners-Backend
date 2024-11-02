@@ -7,6 +7,7 @@ import b4u.pocketpartners.backend.groups.domain.model.aggregates.GroupOperation;
 import b4u.pocketpartners.backend.groups.domain.model.commands.AddGroupOperationCommand;
 import b4u.pocketpartners.backend.groups.domain.model.commands.DeleteGroupOperationCommand;
 import b4u.pocketpartners.backend.groups.domain.services.GroupOperationCommandService;
+import b4u.pocketpartners.backend.groups.infrastructure.persistence.jpa.repositories.GroupMemberRepository;
 import b4u.pocketpartners.backend.groups.infrastructure.persistence.jpa.repositories.GroupOperationRepository;
 import b4u.pocketpartners.backend.groups.infrastructure.persistence.jpa.repositories.GroupRepository;
 import b4u.pocketpartners.backend.operations.domain.model.aggregates.Payment;
@@ -20,12 +21,14 @@ public class GroupOperationCommandServiceImpl implements GroupOperationCommandSe
     private final GroupRepository groupRepository;
     private final ExpenseRepository expenseRepository;
     private final PaymentRepository paymentRepository;
+    private final GroupMemberRepository groupMemberRepository;
 
-    public GroupOperationCommandServiceImpl(GroupOperationRepository groupOperationRepository, GroupRepository groupRepository, ExpenseRepository expenseRepository, PaymentRepository paymentRepository) {
+    public GroupOperationCommandServiceImpl(GroupOperationRepository groupOperationRepository, GroupRepository groupRepository, ExpenseRepository expenseRepository, PaymentRepository paymentRepository, GroupMemberRepository groupMemberRepository) {
         this.groupOperationRepository = groupOperationRepository;
         this.groupRepository = groupRepository;
         this.expenseRepository = expenseRepository;
         this.paymentRepository = paymentRepository;
+        this.groupMemberRepository = groupMemberRepository;
     }
 
     public Long handle(AddGroupOperationCommand command) {
