@@ -3,11 +3,11 @@ package b4u.pocketpartners.backend.groups.domain.model.entities;
 import b4u.pocketpartners.backend.groups.domain.model.aggregates.Group;
 import b4u.pocketpartners.backend.groups.domain.model.valueobjects.GroupMemberId;
 import b4u.pocketpartners.backend.groups.domain.model.valueobjects.GroupRole;
-import b4u.pocketpartners.backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import b4u.pocketpartners.backend.users.domain.model.aggregates.UserInformation;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -27,6 +27,7 @@ public class GroupMember {
      * The group that the user is a member of.
      * It is a many-to-one relationship, as a group can have many members.
      */
+    @Setter
     @Id
     @ManyToOne
     @JoinColumn(name = "group_id")
@@ -74,5 +75,11 @@ public class GroupMember {
         return this.role == GroupRole.ADMIN;
     }
 
+    public Long getIdAdmin() {
+        if (this.role == GroupRole.ADMIN) {
+            return this.userInformation.getId();
+        }
+        return null;
+    }
 
 }

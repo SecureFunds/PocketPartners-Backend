@@ -1,10 +1,7 @@
 package b4u.pocketpartners.backend.groups.application.internal.commandservices;
 
 import b4u.pocketpartners.backend.groups.domain.model.aggregates.Group;
-import b4u.pocketpartners.backend.groups.domain.model.commands.CreateGroupCommand;
-import b4u.pocketpartners.backend.groups.domain.model.commands.DeleteGroupCommand;
-import b4u.pocketpartners.backend.groups.domain.model.commands.GenerateInvitationCommand;
-import b4u.pocketpartners.backend.groups.domain.model.commands.UpdateGroupCommand;
+import b4u.pocketpartners.backend.groups.domain.model.commands.*;
 import b4u.pocketpartners.backend.groups.domain.model.entities.GroupMember;
 import b4u.pocketpartners.backend.groups.domain.model.valueobjects.GroupRole;
 import b4u.pocketpartners.backend.groups.domain.services.GroupCommandService;
@@ -56,6 +53,21 @@ public class GroupCommandServiceImpl implements GroupCommandService {
     }
 
     @Override
+    public Optional<Group> handle(UpdateGroupImageCommand command) {
+
+        Optional<Group> groupOptional = groupRepository.findById(command.id());
+
+        if (groupOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Group group = groupOptional.get();
+        group.changePhoto(command.image());
+        groupRepository.save(group);
+        return Optional.of(group);
+    }
+
+    @Override
     public Optional<Group> handle(UpdateGroupCommand command) {
 
         if (groupRepository.existsByNameAndIdIsNot(command.name(), command.groupId()))
@@ -65,7 +77,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
         if (result.isEmpty()) throw new IllegalArgumentException("Group does not exist");
         var groupToUpdate = result.get();
         try {
-            var updatedGroup = groupRepository.save(groupToUpdate.updateInformation(command.name(), command.description(), command.groupPhotoUrl()));
+            var updatedGroup = groupRepository.save(groupToUpdate.updateInformation(command.name(), command.description()));
             return Optional.of(updatedGroup);
         } catch (Exception e) {
             throw new IllegalArgumentException("Error while updating group: " + e.getMessage());

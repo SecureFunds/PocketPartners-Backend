@@ -11,6 +11,7 @@ public class GroupResourceFromEntityAssembler {
                 group.getDescription(),
                 group.getGroupPhoto(),
                 group.getCreatedAt(),
-                group.getUpdatedAt()
+                group.getUpdatedAt(),
+                group.getAdminId()
         );   }
 }
