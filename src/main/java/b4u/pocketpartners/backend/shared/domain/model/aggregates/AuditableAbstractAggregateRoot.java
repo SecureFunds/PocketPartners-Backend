@@ -1,5 +1,6 @@
 package b4u.pocketpartners.backend.shared.domain.model.aggregates;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,10 +20,12 @@ public class AuditableAbstractAggregateRoot<T extends AbstractAggregateRoot<T>> 
     private Long id;
 
     @CreatedDate
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Lima")
     @Column(nullable = false, updatable = false)
     private Date createdAt;
 
     @LastModifiedDate
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Lima")
     @Column(nullable = false)
     private Date updatedAt;
 

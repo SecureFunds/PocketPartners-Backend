@@ -17,9 +17,9 @@ public class ScheduledTasks {
         this.expensesNotificationService = expensesNotificationService;
     }
 
-    //NO LO ACTIVO A MENOS Q LO NECESITE CONSUME MI DINERITO DE TWILIO
-    //@Scheduled(cron = "0 0 9,17 * * ?", zone = "America/Lima") // Ejecutar a las 9:00 AM y 5:00 PM
-    //public void sendDailyPaymentReminders() {
-        //expensesNotificationService.sendPaymentReminders();
-    //}
+    
+    @Scheduled(cron = "0 35 9,21 * * ?", zone = "America/Lima") 
+    public void sendDailyPaymentReminders() {
+        expensesNotificationService.sendPaymentReminders();
+    }
 }

@@ -1,14 +1,20 @@
 package b4u.pocketpartners.backend.groups.interfaces.rest;
 
 import b4u.pocketpartners.backend.groups.domain.model.aggregates.Group;
+import b4u.pocketpartners.backend.groups.domain.model.commands.DeleteGroupCommand;
+import b4u.pocketpartners.backend.groups.domain.model.commands.GenerateInvitationCommand;
+import b4u.pocketpartners.backend.groups.domain.model.commands.JoinGroupWithTokenCommand;
+import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllGroupsByUserIdQuery;
 import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllGroupsQuery;
 import b4u.pocketpartners.backend.groups.domain.model.queries.GetGroupByIdQuery;
 import b4u.pocketpartners.backend.groups.domain.services.GroupCommandService;
 import b4u.pocketpartners.backend.groups.domain.services.GroupQueryService;
 import b4u.pocketpartners.backend.groups.interfaces.rest.resources.CreateGroupResource;
 import b4u.pocketpartners.backend.groups.interfaces.rest.resources.GroupResource;
+import b4u.pocketpartners.backend.groups.interfaces.rest.resources.UpdateGroupResource;
 import b4u.pocketpartners.backend.groups.interfaces.rest.transform.CreateGroupCommandFromResourceAssembler;
 import b4u.pocketpartners.backend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
+import b4u.pocketpartners.backend.groups.interfaces.rest.transform.UpdateGroupCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -20,9 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(value = "api/v1/groups", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Group", description = "Group Management Endpoints")
 public class GroupController {
@@ -35,50 +39,66 @@ public class GroupController {
         this.groupQueryService = groupQueryService;
     }
 
-    /**
-     * Handles the POST request to create a new group.
-     *
-     * @param createGroupResource The request body containing the details of the group to be created.
-     * @return ResponseEntity<Group> Returns a ResponseEntity containing the created Group and HTTP status.
-     * If the group creation is successful, it returns the created group with HTTP status 201 (Created).
-     * If the group creation fails, it returns HTTP status 400 (Bad Request).
-     */
+    @Operation(summary = "Create a new group")
     @PostMapping
-    public ResponseEntity<Group> createGroup(@RequestBody CreateGroupResource createGroupResource) {
+    public ResponseEntity<GroupResource> createGroup(@RequestBody CreateGroupResource createGroupResource) {
         var createGroupCommand = CreateGroupCommandFromResourceAssembler.toCommandFromResource(createGroupResource);
-        var group = groupCommandService.handle(createGroupCommand);
-        return group.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED)).orElseGet(() -> ResponseEntity.badRequest().build());
-    }
-
-    /**
-     * Handles the GET request to retrieve a group by its ID.
-     *
-     * @param groupId The ID of the group to be retrieved.
-     * @return ResponseEntity<GroupResource> Returns a ResponseEntity containing the retrieved GroupResource and HTTP status.
-     * If the group is found, it returns the group with HTTP status 200 (OK).
-     * If the group is not found, it returns HTTP status 400 (Bad Request).
-     */
-    @GetMapping("/{groupId}")
-    public ResponseEntity<GroupResource> getGroup(@PathVariable Long groupId) {
+        var groupId = groupCommandService.handle(createGroupCommand);
+        if (groupId == 0L)  return ResponseEntity.badRequest().build();
         var getGroupByIdQuery = new GetGroupByIdQuery(groupId);
         var group = groupQueryService.handle(getGroupByIdQuery);
-        if (group.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        var courseResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
-        return ResponseEntity.ok(courseResource);
+        if(group.isEmpty()) return ResponseEntity.badRequest().build();
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return new ResponseEntity<>(groupResource, HttpStatus.CREATED);
     }
 
-    //GET ALL
+    @Operation(summary = "Get by group Id")
+    @GetMapping("/{groupId}")
+    public ResponseEntity<GroupResource> getGroupById(@PathVariable Long groupId) {
+        var getGroupByIdQuery = new GetGroupByIdQuery(groupId);
+        var group = groupQueryService.handle(getGroupByIdQuery);
+        if (group.isEmpty()) return ResponseEntity.badRequest().build();
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return ResponseEntity.ok(groupResource);
+    }
+
     @Operation(summary = "Get all groups")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of groups")
-    })
     @GetMapping
     public ResponseEntity<List<GroupResource>> getAllGroups() {
         var getAllGroupsQuery = new GetAllGroupsQuery();
         var groups = groupQueryService.handle(getAllGroupsQuery);
-        var groupsResources = groups.stream().map(GroupResourceFromEntityAssembler::toResourceFromEntity).collect(Collectors.toList());
-        return ResponseEntity.ok(groupsResources);
+        var groupResources = groups.stream().map(GroupResourceFromEntityAssembler::toResourceFromEntity).toList();
+        return ResponseEntity.ok(groupResources);
     }
+
+    @Operation(summary = "Update by group ID")
+    @PutMapping("/{groupId}")
+    public ResponseEntity<GroupResource> updateGroup(@PathVariable Long groupId, @RequestBody UpdateGroupResource updateGroupResource) {
+        var updateGroupCommand = UpdateGroupCommandFromResourceAssembler.toCommandFromResource(groupId, updateGroupResource);
+        var updatedGroup = groupCommandService.handle(updateGroupCommand);
+        if (updatedGroup.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(updatedGroup.get());
+        return ResponseEntity.ok(groupResource);
+    }
+
+    @Operation(summary = "Delete by group ID")
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<?> deleteGroup(@PathVariable Long groupId) {
+        var deleteGroupCommand = new DeleteGroupCommand(groupId);
+        groupCommandService.handle(deleteGroupCommand);
+        return ResponseEntity.ok("Group with given id successfully deleted");
+    }
+
+    @PostMapping("/{groupId}/generate-invitation")
+    public ResponseEntity<String> generateInvitation(@PathVariable Long groupId) {
+        var command = new GenerateInvitationCommand(groupId);
+        var token = groupCommandService.handle(command);
+        return ResponseEntity.ok(token);
+    }
+
+
+
+
 }

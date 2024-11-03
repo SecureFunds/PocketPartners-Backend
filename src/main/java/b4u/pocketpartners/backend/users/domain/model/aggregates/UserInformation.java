@@ -17,7 +17,7 @@ public class UserInformation extends AuditableAbstractAggregateRoot<UserInformat
     @JoinColumn(name = "user_id")
     private User user;
 
-    //@NotBlank
+    
     @Embedded
     private PersonName name;
 
@@ -27,7 +27,7 @@ public class UserInformation extends AuditableAbstractAggregateRoot<UserInformat
     @Embedded
     private Photo photo;
 
-    //@NotBlank
+    
     @Embedded
     EmailAddress email;
 
@@ -69,7 +69,7 @@ public class UserInformation extends AuditableAbstractAggregateRoot<UserInformat
         this.email = new EmailAddress(email);
     }
 
-    //Getters
+    
     public String getFullName() {
         return name.getFullName();
     }
@@ -87,7 +87,7 @@ public class UserInformation extends AuditableAbstractAggregateRoot<UserInformat
     }
 
 
-    // Setter methods
+    
     public void setName(PersonName name) {
         this.name = name;
     }

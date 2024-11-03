@@ -1,61 +1,103 @@
 package b4u.pocketpartners.backend.groups.interfaces.rest;
 
-import b4u.pocketpartners.backend.groups.domain.model.commands.CreateGroupMemberCommand;
-import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllGroupsOfUserByUserInformationId;
+import b4u.pocketpartners.backend.groups.domain.model.commands.AddMemberCommand;
+import b4u.pocketpartners.backend.groups.domain.model.commands.GenerateInvitationCommand;
+import b4u.pocketpartners.backend.groups.domain.model.commands.JoinGroupWithTokenCommand;
+import b4u.pocketpartners.backend.groups.domain.model.commands.RemoveMemberCommand;
+import b4u.pocketpartners.backend.groups.domain.model.queries.GetALLGroupByUserIdQuery;
 import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllMembersInGroupQuery;
+import b4u.pocketpartners.backend.groups.domain.model.queries.GetGroupByIdQuery;
 import b4u.pocketpartners.backend.groups.domain.services.GroupMemberCommandService;
 import b4u.pocketpartners.backend.groups.domain.services.GroupMemberQueryService;
+import b4u.pocketpartners.backend.groups.interfaces.rest.resources.AddMemberResource;
 import b4u.pocketpartners.backend.groups.interfaces.rest.resources.GroupMemberResource;
+import b4u.pocketpartners.backend.groups.interfaces.rest.resources.JoinGroupWithTokenResource;
+import b4u.pocketpartners.backend.groups.interfaces.rest.transform.AddMemberCommandFromResourceAssembler;
+import b4u.pocketpartners.backend.groups.interfaces.rest.transform.CreateGroupCommandFromResourceAssembler;
 import b4u.pocketpartners.backend.groups.interfaces.rest.transform.GroupMemberResourceFromEntityAssembler;
+import b4u.pocketpartners.backend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping(value = "api/v1/groups")
+@RequestMapping(value = "api/v1/groups",  produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Member Group", description = "Member Group Management Endpoints")
 public class GroupMemberController {
-    private final GroupMemberCommandService groupMemberCommand;
-    private final GroupMemberQueryService groupMemberQuery;
 
-    public GroupMemberController(GroupMemberCommandService groupMemberCommandService, GroupMemberQueryService groupMemberQuery) {
-        this.groupMemberCommand = groupMemberCommandService;
-        this.groupMemberQuery = groupMemberQuery;
+    private final GroupMemberCommandService groupMemberCommandService;
+    private final GroupMemberQueryService groupMemberQueryService;
+
+    public GroupMemberController(GroupMemberCommandService groupMemberCommandService, GroupMemberQueryService groupMemberQueryService) {
+        this.groupMemberCommandService = groupMemberCommandService;
+        this.groupMemberQueryService = groupMemberQueryService;
     }
 
-    @GetMapping("members/{userId}")
-        public ResponseEntity<List<GroupMemberResource>> getGroupsByUserId(@PathVariable Long userId) {
-        var groups = groupMemberQuery.handle(new GetAllGroupsOfUserByUserInformationId(userId));
+    @Operation(summary = "Get all groups by user ID", description = "Retrieves all groups associated with the specified user ID.")
+    @GetMapping("/members/{userId}")
+    public ResponseEntity<List<GroupMemberResource>> getGroupsByUserId(@PathVariable Long userId) {
+        var groups = groupMemberQueryService.handle(new GetALLGroupByUserIdQuery(userId));
         if (groups.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
-        var groupMemberResources = groups.stream().map(GroupMemberResourceFromEntityAssembler::fromEntityToResource);
-        return ResponseEntity.ok(groupMemberResources.toList());
+        var groupMemberResources = groups.stream()
+                .map(GroupMemberResourceFromEntityAssembler::fromEntityToResource)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(groupMemberResources);
     }
 
-    @PostMapping("{groupId}/members/{userId}")
-    public ResponseEntity<GroupMemberResource> joinGroup(@PathVariable Long groupId, @PathVariable Long userId) {
-        var createGroupMemberCommand = new CreateGroupMemberCommand(groupId, userId);
-        var groupMember = groupMemberCommand.handle(createGroupMemberCommand);
-        if (groupMember.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    @Operation(summary = "Add member to group")
+    @PostMapping("/{groupId}/members/{userId}")
+    public ResponseEntity<GroupMemberResource> addMember( @PathVariable Long groupId, @PathVariable Long userId) {
+        var addMemberCommand = new AddMemberCommand(groupId, userId);
+        var addedMember = groupMemberCommandService.handle(addMemberCommand);
+
+        if (addedMember.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        var groupMemberResource = GroupMemberResourceFromEntityAssembler.fromEntityToResource(groupMember.get());
+        var groupMemberResource = GroupMemberResourceFromEntityAssembler.fromEntityToResource(addedMember.get());
         return ResponseEntity.status(HttpStatus.CREATED).body(groupMemberResource);
     }
 
-    @GetMapping("{groupId}/members")
-    public ResponseEntity<List<GroupMemberResource>> getGroupMembers(@PathVariable Long groupId) {
-        var groupMembers = groupMemberQuery.handle(new GetAllMembersInGroupQuery(groupId));
-        if (groupMembers.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        var groupMemberResources = groupMembers.stream().map(GroupMemberResourceFromEntityAssembler::fromEntityToResource);
-        return ResponseEntity.ok(groupMemberResources.toList());
+    @Operation(summary = "Remove member from group")
+    @DeleteMapping("/{groupId}/members/{userId}")
+    public ResponseEntity<String> removeMember(@PathVariable Long groupId, @PathVariable Long userId) {
+        var removeMemberCommand = new RemoveMemberCommand(groupId, userId);
+        groupMemberCommandService.handle(removeMemberCommand);
+        return ResponseEntity.ok("Member removed from group successfully");
     }
+
+
+
+    @Operation(summary = "Get all members of a group")
+    @GetMapping("/{groupId}/members")
+    public ResponseEntity<List<GroupMemberResource>> getGroupMembers(@PathVariable Long groupId) {
+        var getAllMembersInGroupQuery = new GetAllMembersInGroupQuery(groupId);
+        var members = groupMemberQueryService.handle(getAllMembersInGroupQuery);
+
+        if (members.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        var memberResources = members.stream()
+                .map(GroupMemberResourceFromEntityAssembler::fromEntityToResource)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(memberResources);
+    }
+
+    @PostMapping("/{groupId}/join")
+    public ResponseEntity<String> joinGroupWithToken(@PathVariable Long groupId, @RequestBody JoinGroupWithTokenResource joinGroupWithTokenResource  ) {
+        var command = new JoinGroupWithTokenCommand(groupId, joinGroupWithTokenResource.token(), joinGroupWithTokenResource.userId());
+        groupMemberCommandService.handle(command);
+        return ResponseEntity.ok("User successfully joined the group");
+    }
+
+
 
 }
