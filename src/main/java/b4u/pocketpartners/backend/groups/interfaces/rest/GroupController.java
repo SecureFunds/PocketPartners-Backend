@@ -1,9 +1,7 @@
 package b4u.pocketpartners.backend.groups.interfaces.rest;
 
 import b4u.pocketpartners.backend.groups.domain.model.aggregates.Group;
-import b4u.pocketpartners.backend.groups.domain.model.commands.DeleteGroupCommand;
-import b4u.pocketpartners.backend.groups.domain.model.commands.GenerateInvitationCommand;
-import b4u.pocketpartners.backend.groups.domain.model.commands.JoinGroupWithTokenCommand;
+import b4u.pocketpartners.backend.groups.domain.model.commands.*;
 import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllGroupsByUserIdQuery;
 import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllGroupsQuery;
 import b4u.pocketpartners.backend.groups.domain.model.queries.GetGroupByIdQuery;
@@ -11,6 +9,7 @@ import b4u.pocketpartners.backend.groups.domain.services.GroupCommandService;
 import b4u.pocketpartners.backend.groups.domain.services.GroupQueryService;
 import b4u.pocketpartners.backend.groups.interfaces.rest.resources.CreateGroupResource;
 import b4u.pocketpartners.backend.groups.interfaces.rest.resources.GroupResource;
+import b4u.pocketpartners.backend.groups.interfaces.rest.resources.UpdateGroupImageResource;
 import b4u.pocketpartners.backend.groups.interfaces.rest.resources.UpdateGroupResource;
 import b4u.pocketpartners.backend.groups.interfaces.rest.transform.CreateGroupCommandFromResourceAssembler;
 import b4u.pocketpartners.backend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
@@ -27,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
+
 @RequestMapping(value = "api/v1/groups", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Group", description = "Group Management Endpoints")
 public class GroupController {
@@ -71,11 +72,24 @@ public class GroupController {
         return ResponseEntity.ok(groupResources);
     }
 
-    @Operation(summary = "Update by group ID")
+    @Operation(summary = "Update group image by group ID")
+    @PutMapping("/{groupId}/image")
+    public ResponseEntity<GroupResource> updateGroupImage(@PathVariable Long groupId, @RequestBody UpdateGroupImageResource updateGroupImageResource) {
+        var updateGroupImageCommand = new UpdateGroupImageCommand(groupId, updateGroupImageResource.image());
+        var updatedGroup = groupCommandService.handle(updateGroupImageCommand);
+        if (updatedGroup.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(updatedGroup.get());
+        return ResponseEntity.ok(groupResource);
+    }
+
+
+    @Operation(summary = "Update group description and name by group ID")
     @PutMapping("/{groupId}")
-    public ResponseEntity<GroupResource> updateGroup(@PathVariable Long groupId, @RequestBody UpdateGroupResource updateGroupResource) {
-        var updateGroupCommand = UpdateGroupCommandFromResourceAssembler.toCommandFromResource(groupId, updateGroupResource);
-        var updatedGroup = groupCommandService.handle(updateGroupCommand);
+    public ResponseEntity<GroupResource> updateGroupDescriptionAndName(@PathVariable Long groupId, @RequestBody UpdateGroupResource updateGroupResource) {
+        var updateGroupDescriptionAndNameCommand = new UpdateGroupCommand(groupId, updateGroupResource.name(), updateGroupResource.description());
+        var updatedGroup = groupCommandService.handle(updateGroupDescriptionAndNameCommand);
         if (updatedGroup.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
