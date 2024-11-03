@@ -5,6 +5,6 @@ import b4u.pocketpartners.backend.groups.interfaces.rest.resources.UpdateGroupRe
 
 public class UpdateGroupCommandFromResourceAssembler {
     public static UpdateGroupCommand toCommandFromResource(Long groupId, UpdateGroupResource resource) {
-        return new UpdateGroupCommand(groupId, resource.name(), resource.description(), resource.groupPhotoUrl());
+        return new UpdateGroupCommand(groupId, resource.name(), resource.description());
     }
 }

@@ -11,6 +11,7 @@ public record GroupResource(
        String description,
         String groupPhoto,
         Date createdAt,
-        Date updatedAt
+        Date updatedAt,
+        Long adminId
 ) {
 }
