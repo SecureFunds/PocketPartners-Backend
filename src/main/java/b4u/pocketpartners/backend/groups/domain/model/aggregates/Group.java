@@ -1,11 +1,15 @@
 package b4u.pocketpartners.backend.groups.domain.model.aggregates;
 
 import b4u.pocketpartners.backend.groups.domain.model.commands.CreateGroupCommand;
+import b4u.pocketpartners.backend.groups.domain.model.entities.GroupMember;
 import b4u.pocketpartners.backend.groups.domain.model.valueobjects.InvitationToken;
 import b4u.pocketpartners.backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.apache.logging.log4j.util.Strings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Group class represents a group entity in the system.
@@ -21,6 +25,10 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     private String groupPhoto;
     private String description;
     private String invitationToken;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupMember> members = new ArrayList<>();
+
 
 
     public Group() {
@@ -46,10 +54,13 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
 
     }
 
-    public Group updateInformation(String name, String description, String photo) {
+    public void changePhoto(String photo) {
+        this.groupPhoto = photo;
+    }
+
+    public Group updateInformation(String name, String description) {
         this.name = name;
         this.description = description;
-        this.groupPhoto = photo;
         return this;
     }
 
@@ -60,5 +71,20 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     public boolean hasValidInvitationToken(String token) {
         return token.equals(this.invitationToken);
     }
+
+    public void addMember(GroupMember member) {
+        member.setGroup(this);
+        this.members.add(member);
+    }
+
+    public Long getAdminId() {
+        return members.stream()
+                .filter(GroupMember::isAdmin)
+                .findFirst()
+                .map(GroupMember::getIdAdmin)
+                .orElse(null);
+    }
+
+
 
 }

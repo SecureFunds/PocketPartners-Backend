@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(value = "api/v1/groups",  produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Member Group", description = "Member Group Management Endpoints")
 public class GroupMemberController {
@@ -67,10 +69,10 @@ public class GroupMemberController {
 
     @Operation(summary = "Remove member from group")
     @DeleteMapping("/{groupId}/members/{userId}")
-    public ResponseEntity<String> removeMember(@PathVariable Long groupId, @PathVariable Long userId) {
+    public  ResponseEntity<Void> removeMember(@PathVariable Long groupId, @PathVariable Long userId) {
         var removeMemberCommand = new RemoveMemberCommand(groupId, userId);
         groupMemberCommandService.handle(removeMemberCommand);
-        return ResponseEntity.ok("Member removed from group successfully");
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -92,11 +94,19 @@ public class GroupMemberController {
     }
 
     @PostMapping("/{groupId}/join")
-    public ResponseEntity<String> joinGroupWithToken(@PathVariable Long groupId, @RequestBody JoinGroupWithTokenResource joinGroupWithTokenResource  ) {
+    public ResponseEntity<GroupMemberResource> joinGroupWithToken(
+            @PathVariable Long groupId,
+            @RequestBody JoinGroupWithTokenResource joinGroupWithTokenResource) {
+
         var command = new JoinGroupWithTokenCommand(groupId, joinGroupWithTokenResource.token(), joinGroupWithTokenResource.userId());
-        groupMemberCommandService.handle(command);
-        return ResponseEntity.ok("User successfully joined the group");
+        var newMember = groupMemberCommandService.handle(command);
+        if (newMember.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Or handle as an error
+        }
+        var memberResource = GroupMemberResourceFromEntityAssembler.fromEntityToResource(newMember.get());
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberResource);
     }
+
 
 
 
