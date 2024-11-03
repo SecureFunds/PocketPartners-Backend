@@ -1,7 +1,7 @@
 package b4u.pocketpartners.backend.groups.application.internal.queryservices;
 
 import b4u.pocketpartners.backend.groups.domain.model.entities.GroupMember;
-import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllGroupsOfUserByUserInformationId;
+import b4u.pocketpartners.backend.groups.domain.model.queries.GetALLGroupByUserIdQuery;
 import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllMembersInGroupQuery;
 import b4u.pocketpartners.backend.groups.domain.services.GroupMemberQueryService;
 import b4u.pocketpartners.backend.groups.infrastructure.persistence.jpa.repositories.GroupMemberRepository;
@@ -24,7 +24,10 @@ public class GroupMemberQueryServiceImpl implements GroupMemberQueryService {
     }
 
     @Override
-    public List<GroupMember> handle(GetAllGroupsOfUserByUserInformationId query) {
-        return groupMemberRepository.findAllByUserInformationUserId(query.userId());
+    public List<GroupMember> handle(GetALLGroupByUserIdQuery query) {
+        return groupMemberRepository.findAllByUserInformationId(query.userId());
     }
+
+
+
 }

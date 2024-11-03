@@ -1,23 +1,20 @@
 package b4u.pocketpartners.backend.groups.domain.model.valueobjects;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.Objects;
 
 public class GroupMemberId implements Serializable {
+    
+    @Setter
+    @Getter
     private Long group;
     private Long userInformation;
 
-    // Default constructor
+    
     public GroupMemberId() {}
-
-    // Getters and setters
-    public Long getGroup() {
-        return group;
-    }
-
-    public void setGroup(Long group) {
-        this.group = group;
-    }
 
     public Long getUser() {
         return userInformation;
@@ -27,7 +24,7 @@ public class GroupMemberId implements Serializable {
         this.userInformation = userInformation;
     }
 
-    // hashCode and equals implementation
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

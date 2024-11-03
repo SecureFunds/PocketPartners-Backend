@@ -15,8 +15,8 @@ public class ExpensesContextFacade {
         this.expenseCommandService = expenseCommandService;
     }
 
-    //public Long createExpense(String name, BigDecimal amount, Long userId) {
-    //    var createExpenseCommand = new CreateExpenseCommand(name, amount, userId);
+    //public Long createExpense(String name, BigDecimal amount, Long requesterId) {
+    //    var createExpenseCommand = new CreateExpenseCommand(name, amount, requesterId);
     //    var expense = expenseCommandService.handle(createExpenseCommand);
     //    if(expense == null) return 0L;
     //    return expense.toString().getId();

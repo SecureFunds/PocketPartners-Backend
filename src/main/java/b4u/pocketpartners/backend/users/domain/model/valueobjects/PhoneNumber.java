@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 @Embeddable
 public record PhoneNumber(
         @NotBlank
-        @Size(min = 9, max = 13) // Ajusta el tamaño según tus requisitos
+        @Size(min = 9, max = 13)
         @Pattern(regexp = "^\\+?[0-9]*$", message = "Phone number must contain only digits and optionally start with a '+'")
         String number
 ) {
@@ -24,7 +24,7 @@ public record PhoneNumber(
         }
     }
 
-    // Método de fábrica para crear una instancia con un valor predeterminado si es necesario
+
     public static PhoneNumber defaultPhoneNumber() {
         return new PhoneNumber("+0000000000");
     }
