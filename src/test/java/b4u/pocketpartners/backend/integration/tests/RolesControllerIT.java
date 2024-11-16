@@ -34,7 +34,6 @@ public class RolesControllerIT {
 
     @Test
     void givenNoRolesExist_whenGetAllRoles_thenReturnEmptyList() throws Exception {
-        // Configuración opcional: Limpiar los datos en la base de datos para esta prueba si es necesario.
 
         // Act & Assert
         mockMvc.perform(get("/ap/v1/roles")

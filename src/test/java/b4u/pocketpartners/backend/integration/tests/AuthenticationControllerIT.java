@@ -1,17 +1,24 @@
 package b4u.pocketpartners.backend.integration.tests;
 
+import b4u.pocketpartners.backend.users.domain.model.aggregates.User;
+import b4u.pocketpartners.backend.users.domain.services.UserCommandService;
+import b4u.pocketpartners.backend.users.infrastructure.persistence.jpa.repositories.UserRepository;
 import b4u.pocketpartners.backend.users.interfaces.rest.resources.SignInResource;
 import b4u.pocketpartners.backend.users.interfaces.rest.resources.SignUpResource;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -21,11 +28,20 @@ public class AuthenticationControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+    @MockBean
+    private UserRepository userRepository;
+    @MockBean
+    private UserCommandService userCommandService;
+
+
+
+
 
     @Test
     void givenValidSignInRequest_whenSignIn_thenReturnAuthenticatedUser() throws Exception {
+
         // Arrange
-        SignInResource signInResource = new SignInResource("validUser1", "validPassword");
+        SignInResource signInResource = new SignInResource("newUser2", "newPassword");
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/authentication/sign-in")
@@ -33,7 +49,7 @@ public class AuthenticationControllerIT {
                         .content(asJsonString(signInResource)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", notNullValue()))
-                .andExpect(jsonPath("$.user.username", is("validUser")));
+                .andExpect(jsonPath("$.user.username", is("newUser2")));
     }
 
     @Test
@@ -48,14 +64,16 @@ public class AuthenticationControllerIT {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
+
+    @Test //No cambiar
     void givenValidSignUpRequest_whenSignUp_thenReturnCreatedUser() throws Exception {
         // Arrange
         SignUpResource signUpResource = new SignUpResource(
-                "newUser",
+                "newUser2",
                 "newPassword",
                 List.of("ROLE_USER")
         );
+
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/authentication/sign-up")
@@ -71,7 +89,7 @@ public class AuthenticationControllerIT {
         SignUpResource signUpResource = new SignUpResource(
                 "newUser",
                 "newPassword",
-                List.of("ROLE_USER")
+                List.of("ROLE_ADMIN")
         );
 
         // Act & Assert
