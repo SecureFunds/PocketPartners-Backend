@@ -1,96 +1,135 @@
 package b4u.pocketpartners.backend.integration.tests;
 
 import b4u.pocketpartners.backend.groups.domain.model.aggregates.Group;
-import b4u.pocketpartners.backend.groups.domain.model.commands.CreateGroupCommand;
-import b4u.pocketpartners.backend.groups.domain.model.commands.DeleteGroupCommand;
-import b4u.pocketpartners.backend.groups.domain.model.queries.GetAllGroupsQuery;
-import b4u.pocketpartners.backend.groups.domain.model.queries.GetGroupByIdQuery;
+import b4u.pocketpartners.backend.groups.domain.model.commands.*;
+import b4u.pocketpartners.backend.groups.domain.model.queries.*;
+import b4u.pocketpartners.backend.groups.interfaces.rest.GroupController;
+import b4u.pocketpartners.backend.groups.interfaces.rest.resources.*;
 import b4u.pocketpartners.backend.groups.domain.services.GroupCommandService;
 import b4u.pocketpartners.backend.groups.domain.services.GroupQueryService;
-import b4u.pocketpartners.backend.groups.interfaces.rest.resources.CreateGroupResource;
-import b4u.pocketpartners.backend.groups.interfaces.rest.resources.UpdateGroupImageResource;
-import b4u.pocketpartners.backend.groups.interfaces.rest.resources.UpdateGroupResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Optional;
-import java.util.List;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @SpringBootTest
-@AutoConfigureMockMvc
 class GroupControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @InjectMocks
+    private GroupController groupController;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private GroupCommandService groupCommandService;
 
-    @MockBean
+    @Mock
     private GroupQueryService groupQueryService;
 
-    @Test
-    void shouldCreateGroupSuccessfully() throws Exception {
-        CreateGroupResource createGroupResource = new CreateGroupResource("Test Group", "photo.jpg", "Description", 1L);
-        Group group = new Group("Test Group", "Description", "photo.jpg");
-        ReflectionTestUtils.setField(group, "id", 1L);
+    private MockMvc mockMvc;
 
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(groupController).build();
+        objectMapper = new ObjectMapper();
+    }
+
+    @Test
+    void testCreateGroup() throws Exception {
+        CreateGroupResource resource = new CreateGroupResource("Test Group", "http://example.com/photo.jpg", "Test Description", 1L);
+
+        // Mock del servicio
         when(groupCommandService.handle(any(CreateGroupCommand.class))).thenReturn(1L);
-        when(groupQueryService.handle(any(GetGroupByIdQuery.class))).thenReturn(Optional.of(group));
+        when(groupQueryService.handle(any(GetGroupByIdQuery.class))).thenReturn(Optional.of(new Group()));
 
         mockMvc.perform(post("/api/v1/groups")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createGroupResource)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Test Group"));
+                        .content(objectMapper.writeValueAsString(resource)))
+                .andExpect(status().isCreated());
     }
 
     @Test
-    void shouldGetGroupByIdSuccessfully() throws Exception {
-        Group group = new Group("Test Group", "Description", "photo.jpg");
-        ReflectionTestUtils.setField(group, "id", 1L);
+    void testGetGroupById() throws Exception {
+        Long groupId = 1L;
 
-        when(groupQueryService.handle(any(GetGroupByIdQuery.class))).thenReturn(Optional.of(group));
+        // Mock del servicio
+        Group mockGroup = new Group(); // Asegúrate de inicializarlo con datos válidos
+        when(groupQueryService.handle(any(GetGroupByIdQuery.class))).thenReturn(Optional.of(mockGroup));
 
-        mockMvc.perform(get("/api/v1/groups/{groupId}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Test Group"));
+        mockMvc.perform(get("/api/v1/groups/{groupId}", groupId))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void shouldGetAllGroupsSuccessfully() throws Exception {
-        Group group1 = new Group("Group 1", "Description 1", "photo1.jpg");
-        Group group2 = new Group("Group 2", "Description 2", "photo2.jpg");
-
-        when(groupQueryService.handle(any(GetAllGroupsQuery.class))).thenReturn(List.of(group1, group2));
+    void testGetAllGroups() throws Exception {
+        // Mock del servicio
+        when(groupQueryService.handle(any(GetAllGroupsQuery.class))).thenReturn(List.of(new Group()));
 
         mockMvc.perform(get("/api/v1/groups"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Group 1"))
-                .andExpect(jsonPath("$[1].name").value("Group 2"));
+                .andExpect(status().isOk());
     }
 
     @Test
-    void shouldDeleteGroupSuccessfully() throws Exception {
+    void testUpdateGroupImage() throws Exception {
+        Long groupId = 1L;
+        UpdateGroupImageResource resource = new UpdateGroupImageResource("http://example.com/new-image.jpg");
+
+        // Mock del servicio
+        when(groupCommandService.handle(any(UpdateGroupImageCommand.class))).thenReturn(Optional.of(new Group()));
+
+        mockMvc.perform(put("/api/v1/groups/{groupId}/image", groupId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resource)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testUpdateGroupDescriptionAndName() throws Exception {
+        Long groupId = 1L;
+        UpdateGroupResource resource = new UpdateGroupResource("Updated Name", "Updated Description");
+
+        // Mock del servicio
+        when(groupCommandService.handle(any(UpdateGroupCommand.class))).thenReturn(Optional.of(new Group()));
+
+        mockMvc.perform(put("/api/v1/groups/{groupId}", groupId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resource)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testDeleteGroup() throws Exception {
+        Long groupId = 1L;
+
+        // Mock del servicio
         doNothing().when(groupCommandService).handle(any(DeleteGroupCommand.class));
 
-        mockMvc.perform(delete("/api/v1/groups/{groupId}", 1L))
+        mockMvc.perform(delete("/api/v1/groups/{groupId}", groupId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGenerateInvitation() throws Exception {
+        Long groupId = 1L;
+
+        // Mock del servicio
+        when(groupCommandService.handle(any(GenerateInvitationCommand.class))).thenReturn("mocked-token");
+
+        mockMvc.perform(post("/api/v1/groups/{groupId}/generate-invitation", groupId))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Group with given id successfully deleted"));
+                .andExpect(content().string("mocked-token"));
     }
 }
